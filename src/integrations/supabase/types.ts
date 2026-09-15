@@ -14,16 +14,323 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      accounts: {
+        Row: {
+          account_number: string
+          balance: number
+          created_at: string
+          currency: string
+          id: string
+          kind: string
+          name: string
+          routing_number: string
+          user_id: string
+        }
+        Insert: {
+          account_number: string
+          balance?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          kind?: string
+          name: string
+          routing_number?: string
+          user_id: string
+        }
+        Update: {
+          account_number?: string
+          balance?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          kind?: string
+          name?: string
+          routing_number?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          detail: string
+          id: string
+          severity: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          detail?: string
+          id?: string
+          severity?: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          detail?: string
+          id?: string
+          severity?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      beneficiaries: {
+        Row: {
+          account_number: string
+          bank_name: string
+          created_at: string
+          id: string
+          name: string
+          nickname: string | null
+          user_id: string
+        }
+        Insert: {
+          account_number: string
+          bank_name: string
+          created_at?: string
+          id?: string
+          name: string
+          nickname?: string | null
+          user_id: string
+        }
+        Update: {
+          account_number?: string
+          bank_name?: string
+          created_at?: string
+          id?: string
+          name?: string
+          nickname?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cards: {
+        Row: {
+          account_id: string | null
+          brand: string
+          card_type: string
+          created_at: string
+          exp_month: number
+          exp_year: number
+          frozen: boolean
+          id: string
+          label: string
+          last4: string
+          monthly_limit: number
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          brand?: string
+          card_type?: string
+          created_at?: string
+          exp_month: number
+          exp_year: number
+          frozen?: boolean
+          id?: string
+          label: string
+          last4: string
+          monthly_limit?: number
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          brand?: string
+          card_type?: string
+          created_at?: string
+          exp_month?: number
+          exp_year?: number
+          frozen?: boolean
+          id?: string
+          label?: string
+          last4?: string
+          monthly_limit?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cards_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          read: boolean
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          read?: boolean
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          read?: boolean
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string | null
+          status: Database["public"]["Enums"]["account_status"]
+          two_factor_enabled: boolean
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email: string
+          full_name?: string
+          id: string
+          phone?: string | null
+          status?: Database["public"]["Enums"]["account_status"]
+          two_factor_enabled?: boolean
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          status?: Database["public"]["Enums"]["account_status"]
+          two_factor_enabled?: boolean
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          balance_after: number
+          category: string
+          counterparty: string | null
+          created_at: string
+          description: string
+          direction: Database["public"]["Enums"]["txn_direction"]
+          id: string
+          reference: string
+          state: Database["public"]["Enums"]["txn_state"]
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          balance_after?: number
+          category?: string
+          counterparty?: string | null
+          created_at?: string
+          description: string
+          direction: Database["public"]["Enums"]["txn_direction"]
+          id?: string
+          reference?: string
+          state?: Database["public"]["Enums"]["txn_state"]
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          balance_after?: number
+          category?: string
+          counterparty?: string | null
+          created_at?: string
+          description?: string
+          direction?: Database["public"]["Enums"]["txn_direction"]
+          id?: string
+          reference?: string
+          state?: Database["public"]["Enums"]["txn_state"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      admin_set_status: {
+        Args: {
+          _status: Database["public"]["Enums"]["account_status"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      claim_admin: { Args: never; Returns: undefined }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      make_transfer: {
+        Args: {
+          _amount: number
+          _from_account: string
+          _memo: string
+          _to_account: string
+          _to_name: string
+        }
+        Returns: Json
+      }
+      provision_demo: { Args: never; Returns: undefined }
     }
     Enums: {
-      [_ in never]: never
+      account_status: "PENDING" | "RESTRICTED" | "ACTIVE"
+      app_role: "admin" | "customer"
+      txn_direction: "credit" | "debit"
+      txn_state: "pending" | "completed" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +457,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      account_status: ["PENDING", "RESTRICTED", "ACTIVE"],
+      app_role: ["admin", "customer"],
+      txn_direction: ["credit", "debit"],
+      txn_state: ["pending", "completed", "failed"],
+    },
   },
 } as const
