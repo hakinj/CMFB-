@@ -113,3 +113,108 @@ export async function sendTransfer(input: {
   }
   return data as unknown as { reference: string; balance: number };
 }
+
+export async function fetchExtras() {
+  const userId = await requireUserId();
+  const [beneficiaries, cards, audit] = await Promise.all([
+    supabase.from("beneficiaries").select("*").eq("user_id", userId).order("created_at"),
+    supabase.from("cards").select("*").eq("user_id", userId).order("created_at"),
+    supabase
+      .from("audit_logs")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(50),
+  ]);
+  const error = beneficiaries.error ?? cards.error ?? audit.error;
+  if (error) throw new Error(error.message);
+  return {
+    beneficiaries: (beneficiaries.data ?? []) as Beneficiary[],
+    cards: (cards.data ?? []) as Card[],
+    audit: (audit.data ?? []) as AuditLog[],
+  };
+}
+
+export async function addBeneficiary(input: {
+  name: string;
+  bankName: string;
+  accountNumber: string;
+  nickname: string;
+}) {
+  const userId = await requireUserId();
+  const { error } = await supabase.from("beneficiaries").insert({
+    user_id: userId,
+    name: input.name,
+    bank_name: input.bankName,
+    account_number: input.accountNumber,
+    nickname: input.nickname,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function removeBeneficiary(id: string) {
+  const { error } = await supabase.from("beneficiaries").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function setCardFrozen(id: string, frozen: boolean) {
+  const { error } = await supabase.from("cards").update({ frozen }).eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function setCardLimit(id: string, monthlyLimit: number) {
+  const { error } = await supabase.from("cards").update({ monthly_limit: monthlyLimit }).eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function markAllNotificationsRead() {
+  const userId = await requireUserId();
+  const { error } = await supabase
+    .from("notifications")
+    .update({ read: true })
+    .eq("user_id", userId)
+    .eq("read", false);
+  if (error) throw new Error(error.message);
+}
+
+export async function updateProfile(input: {
+  fullName: string;
+  phone: string;
+  address: string;
+  twoFactorEnabled: boolean;
+}) {
+  const userId = await requireUserId();
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      full_name: input.fullName,
+      phone: input.phone,
+      address: input.address,
+      two_factor_enabled: input.twoFactorEnabled,
+    })
+    .eq("id", userId);
+  if (error) throw new Error(error.message);
+}
+
+export async function claimAdmin() {
+  const { error } = await supabase.rpc("claim_admin");
+  if (error) throw new Error(error.message);
+}
+
+export async function fetchAdminData() {
+  const [profiles, audit] = await Promise.all([
+    supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+    supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(100),
+  ]);
+  const error = profiles.error ?? audit.error;
+  if (error) throw new Error(error.message);
+  return {
+    profiles: (profiles.data ?? []) as Profile[],
+    audit: (audit.data ?? []) as AuditLog[],
+  };
+}
+
+export async function adminSetStatus(userId: string, status: AccountStatus) {
+  const { error } = await supabase.rpc("admin_set_status", { _user_id: userId, _status: status });
+  if (error) throw new Error(error.message);
+}
