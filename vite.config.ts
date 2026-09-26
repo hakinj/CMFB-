@@ -12,6 +12,6 @@ export default defineConfig({
     viteReact(),
   ],
   preview: {
-     allowedHosts: ['onrender.com']
+     allowedHosts: ['cmfb-com.onrender.com']
   },
 });
