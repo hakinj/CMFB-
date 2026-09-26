@@ -12,6 +12,6 @@ export default defineConfig({
     viteReact(),
   ],
   preview: {
-     allowedHosts: ['.online.com']
+     allowedHosts: ['onrender.com']
   },
 });
