@@ -30,7 +30,24 @@ function NotificationsPage() {
 
   if (isLoading || !data) return <Skeletons rows={4} />;
 
-  const unread = data.notifications.filter((n) => !n.read).length;
+  const rawNotifications = data.notifications ?? [];
+
+  // Normalize notifications
+  const notifications = rawNotifications.map((n: any) => {
+    const isRead = Boolean(n.read ?? n.is_read ?? n.read_at);
+    const kind = (n.kind || n.type || n.severity || "info").toLowerCase();
+
+    return {
+      ...n,
+      read: isRead,
+      kind: TONE[kind] ? kind : "info",
+      title: n.title || n.subject || "Notification",
+      body: n.body || n.message || n.content || "",
+      created_at: n.created_at || n.timestamp || new Date().toISOString(),
+    };
+  });
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <div>
@@ -38,7 +55,7 @@ function NotificationsPage() {
         title="Notifications"
         subtitle="Everything the bank has flagged on your account, newest first."
         action={
-          unread > 0 ? (
+          unreadCount > 0 ? (
             <button
               onClick={() =>
                 markAllNotificationsRead().then(() =>
@@ -54,24 +71,24 @@ function NotificationsPage() {
       />
 
       <ul className="space-y-3">
-        {data.notifications.map((n) => (
+        {notifications.map((n) => (
           <li
             key={n.id}
             className={`reveal panel flex gap-4 p-5 ${n.read ? "opacity-70" : ""}`}
           >
             <span
-              className={`grid size-10 shrink-0 place-items-center rounded-xl border ${TONE[n.kind] ?? TONE["info"]}`}
+              className={`grid size-10 shrink-0 place-items-center rounded-xl border ${TONE[n.kind]}`}
             >
               <Bell className="size-4" />
             </span>
             <div className="min-w-0">
               <p className="text-sm font-medium text-ink">{n.title}</p>
-              <p className="mt-1 text-sm text-ink-muted">{n.body}</p>
+              {n.body && <p className="mt-1 text-sm text-ink-muted">{n.body}</p>}
               <p className="mt-2 text-xs text-ink-muted">{longDate(n.created_at)}</p>
             </div>
           </li>
         ))}
-        {data.notifications.length === 0 && (
+        {notifications.length === 0 && (
           <li className="panel p-6 text-sm text-ink-muted">You have no notifications.</li>
         )}
       </ul>

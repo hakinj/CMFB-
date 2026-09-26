@@ -125,7 +125,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-canvas">
-      <div className="mx-auto flex w-full max-w-[1400px]">
+      <div className="mx-auto flex w-full max-w-350">
         <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col justify-between border-r border-line bg-panel/70 px-4 py-6 lg:flex">
           <div className="space-y-8">
             <Link to="/dashboard">
@@ -150,7 +150,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Logo compact />
               </div>
               <p className="hidden text-sm text-ink-muted lg:block">
-                Secure online banking · Demo environment
+                Secure online banking you can trust!
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -165,7 +165,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                         : "bg-danger-soft text-danger",
                   )}
                 >
-                  {statusCopy[status].label}
+                  {'RESTRICTED'}
                 </span>
               )}
               <Link

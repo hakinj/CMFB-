@@ -22,20 +22,43 @@ function TransactionsPage() {
   const [query, setQuery] = useState("");
   const [direction, setDirection] = useState<"all" | "credit" | "debit">("all");
 
+  const normalizedList = useMemo(() => {
+    const rawList = data?.transactions ?? [];
+
+    return rawList.map((t: any) => {
+      const isCredit =
+        t.direction === "credit" ||
+        t.type === "credit" ||
+        t.type === "INCOMING" ||
+        t.type === "CREDIT";
+
+      return {
+        ...t,
+        description: t.description || "Transaction",
+        category: t.category || "General",
+        counterparty: t.counterparty || "",
+        reference: t.reference || "N/A",
+        direction: isCredit ? ("credit" as const) : ("debit" as const),
+        amount: Number(t.amount ?? 0),
+        balance_after: Number(t.balance_after ?? t.balance ?? 0),
+        created_at: t.created_at || new Date().toISOString(),
+      };
+    });
+  }, [data?.transactions]);
+
   const rows = useMemo(() => {
-    const list = data?.transactions ?? [];
     const q = query.trim().toLowerCase();
-    return list.filter((t) => {
+    return normalizedList.filter((t) => {
       if (direction !== "all" && t.direction !== direction) return false;
       if (!q) return true;
       return (
         t.description.toLowerCase().includes(q) ||
         t.category.toLowerCase().includes(q) ||
-        (t.counterparty ?? "").toLowerCase().includes(q) ||
+        t.counterparty.toLowerCase().includes(q) ||
         t.reference.toLowerCase().includes(q)
       );
     });
-  }, [data, query, direction]);
+  }, [normalizedList, query, direction]);
 
   if (isLoading || !data?.profile) return <Skeletons rows={5} />;
 

@@ -35,28 +35,59 @@ function Dashboard() {
     );
   }
 
-  const total = data.accounts.reduce((sum, a) => sum + Number(a.balance), 0);
-  const recent = data.transactions.slice(0, 6);
-  const month = data.transactions.filter(
-    (t) => new Date(t.created_at) > new Date(Date.now() - 30 * 864e5),
+  const accounts = data.accounts ?? [];
+  const rawTransactions = data.transactions ?? [];
+
+  // Normalize transactions to account for database column 'type' instead of 'direction'
+  const transactions = rawTransactions.map((t: any) => {
+    const isCredit =
+      t.direction === "credit" ||
+      t.type === "credit" ||
+      t.type === "INCOMING" ||
+      t.type === "CREDIT";
+
+    return {
+      ...t,
+      direction: isCredit ? ("credit" as const) : ("debit" as const),
+      category: t.category || t.type || "General",
+    };
+  });
+
+  const total = accounts.reduce((sum, a) => sum + Number(a.balance || 0), 0);
+  const recent = transactions.slice(0, 6);
+  const month = transactions.filter(
+    (t) => new Date(t.created_at).getTime() > Date.now() - 30 * 864e5,
   );
-  const inflow = month.filter((t) => t.direction === "credit").reduce((s, t) => s + Number(t.amount), 0);
-  const outflow = month.filter((t) => t.direction === "debit").reduce((s, t) => s + Number(t.amount), 0);
+  const inflow = month
+    .filter((t) => t.direction === "credit")
+    .reduce((s, t) => s + Number(t.amount || 0), 0);
+  const outflow = month
+    .filter((t) => t.direction === "debit")
+    .reduce((s, t) => s + Number(t.amount || 0), 0);
+
+  const firstName = data.profile.full_name
+    ? data.profile.full_name.split(" ")[0]
+    : data.profile.first_name || "member";
 
   return (
     <div>
       <PageHeader
-        title={`Good day, ${data.profile.full_name.split(" ")[0] || "member"}`}
+        title={`Good day, ${firstName}`}
         subtitle="Here's where your money stands today across Confidential Micro Finance Bank."
       />
-      <StatusNotice status={data.profile.status} blurb={statusCopy[data.profile.status].blurb} />
+      {data.profile.status && statusCopy[data.profile.status] && (
+        <StatusNotice
+          status={data.profile.status}
+          blurb={statusCopy[data.profile.status].blurb}
+        />
+      )}
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="reveal rounded-2xl bg-ink p-6 text-white lg:col-span-1">
           <p className="text-xs uppercase tracking-[0.18em] text-white/50">Total balance</p>
           <p className="numeral mt-3 font-display text-4xl">{money(total)}</p>
           <p className="mt-1 text-xs text-white/60">
-            Across {data.accounts.length} account{data.accounts.length === 1 ? "" : "s"}
+            Across {accounts.length} account{accounts.length === 1 ? "" : "s"}
           </p>
           <div className="mt-6 grid grid-cols-2 gap-3 text-sm">
             <div className="rounded-xl bg-white/10 p-3">
@@ -71,10 +102,14 @@ function Dashboard() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:col-span-2">
-          {data.accounts.map((a) => (
+          {accounts.map((a: any) => (
             <Link key={a.id} to="/accounts" className="panel reveal block p-5 transition-shadow hover:shadow-md">
-              <p className="text-xs uppercase tracking-wide text-ink-muted">{a.kind}</p>
-              <p className="mt-1 font-display text-lg text-ink">{a.name}</p>
+              <p className="text-xs uppercase tracking-wide text-ink-muted">
+                {a.kind || a.account_type || "Deposit Account"}
+              </p>
+              <p className="mt-1 font-display text-lg text-ink">
+                {a.name || `${a.account_type || "Checking"} Account`}
+              </p>
               <p className="numeral mt-4 text-2xl font-semibold text-ink">{money(a.balance)}</p>
               <p className="numeral mt-1 text-xs text-ink-muted">{maskAccount(a.account_number)}</p>
             </Link>

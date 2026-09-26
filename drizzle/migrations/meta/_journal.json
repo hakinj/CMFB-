@@ -8,6 +8,34 @@
       "when": 1789433225401,
       "tag": "0000_cmfb_core_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789644783828,
+      "tag": "0001_sturdy_scalphunter",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789644879672,
+      "tag": "0002_brainy_black_tom",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789644955755,
+      "tag": "0003_closed_wrecking_crew",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789979082006,
+      "tag": "0004_unique_echo",
+      "breakpoints": true
     }
   ]
 }

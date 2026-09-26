@@ -8,16 +8,16 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Sign in — Confidential Micro Finance Bank" },
+      { title: "Sign in — Confidential Bank & Trust" },
       {
         name: "description",
         content:
-          "Sign in or open a demo account with Confidential Micro Finance Bank online banking.",
+          "Sign in or open an account with Confidential Bank online banking.",
       },
-      { property: "og:title", content: "Sign in — Confidential Micro Finance Bank" },
+      { property: "og:title", content: "Sign in — Confidential Bank & Trust" },
       {
         property: "og:description",
-        content: "Secure online banking access for CMFB members.",
+        content: "Secure online banking access for members.",
       },
     ],
   }),
@@ -27,9 +27,23 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  
+  // Auth Credentials
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+
+  // Detailed Account Opening Inputs
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [ssn, setSsn] = useState("");
+  const [dob, setDob] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [schemerId, setSchemerId] = useState("");
+
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -50,7 +64,19 @@ function AuthPage() {
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { full_name: fullName },
+            data: {
+              first_name: firstName,
+              middle_name: middleName,
+              last_name: lastName,
+              full_name: `${firstName} ${middleName ? middleName + " " : ""}${lastName}`,
+              ssn,
+              dob,
+              address,
+              city,
+              state,
+              zip_code: zipCode,
+              schemer_id: schemerId,
+            },
           },
         });
         if (err) throw err;
@@ -78,7 +104,7 @@ function AuthPage() {
           <span className="grid size-9 place-items-center rounded-xl bg-white font-display text-base font-semibold text-ink">
             C
           </span>
-          <span className="text-sm font-medium tracking-wide">Confidential Micro Finance Bank</span>
+          <span className="text-sm font-medium tracking-wide">Confidential Bank & Trust</span>
         </Link>
         <div className="max-w-md space-y-4">
           <h2 className="font-display text-4xl leading-tight">
@@ -95,30 +121,112 @@ function AuthPage() {
       </div>
 
       <div className="flex items-center justify-center bg-canvas px-4 py-12">
-        <div className="w-full max-w-sm">
+        <div className={`w-full transition-all ${mode === "signup" ? "max-w-xl" : "max-w-sm"}`}>
           <div className="mb-8 lg:hidden">
             <Logo />
           </div>
           <h1 className="font-display text-2xl font-semibold text-ink">
-            {mode === "signin" ? "Sign in to online banking" : "Open your demo account"}
+            {mode === "signin" ? "Sign in to online banking" : "Open your account"}
           </h1>
           <p className="mt-1 text-sm text-ink-muted">
             {mode === "signin"
-              ? "Use your CMFB member email and password."
-              : "New profiles start restricted until the bank activates them."}
+              ? "Use your member email and password."
+              : "Complete the mandatory compliance details to apply for an account."}
           </p>
 
           <form onSubmit={submit} className="mt-6 space-y-4">
             {mode === "signup" && (
-              <Field
-                label="Full name"
-                value={fullName}
-                onChange={setFullName}
-                type="text"
-                placeholder="Jordan Avery"
-                required
-              />
+              <>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <Field
+                    label="First Name"
+                    value={firstName}
+                    onChange={setFirstName}
+                    type="text"
+                    placeholder="Jane"
+                    required
+                  />
+                  <Field
+                    label="Middle Name"
+                    value={middleName}
+                    onChange={setMiddleName}
+                    type="text"
+                    placeholder="Ann"
+                  />
+                  <Field
+                    label="Last Name"
+                    value={lastName}
+                    onChange={setLastName}
+                    type="text"
+                    placeholder="Doe"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Field
+                    label="Social Security Number (SSN)"
+                    value={ssn}
+                    onChange={setSsn}
+                    type="password"
+                    placeholder="XXX-XX-XXXX"
+                    required
+                  />
+                  <Field
+                    label="Date of Birth"
+                    value={dob}
+                    onChange={setDob}
+                    type="date"
+                    required
+                  />
+                </div>
+
+                <Field
+                  label="Street Address"
+                  value={address}
+                  onChange={setAddress}
+                  type="text"
+                  placeholder="123 Main Street, Apt 4B"
+                  required
+                />
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <Field
+                    label="City"
+                    value={city}
+                    onChange={setCity}
+                    type="text"
+                    placeholder="New York"
+                    required
+                  />
+                  <Field
+                    label="State"
+                    value={state}
+                    onChange={setState}
+                    type="text"
+                    placeholder="NY"
+                    required
+                  />
+                  <Field
+                    label="Zip Code"
+                    value={zipCode}
+                    onChange={setZipCode}
+                    type="text"
+                    placeholder="10001"
+                    required
+                  />
+                </div>
+
+                <Field
+                  label="Referrer Id"
+                  value={schemerId}
+                  onChange={setSchemerId}
+                  type="text"
+                  placeholder="SCH-12345"
+                />
+              </>
             )}
+
             <Field
               label="Email"
               value={email}
@@ -151,7 +259,7 @@ function AuthPage() {
           </form>
 
           <p className="mt-6 text-center text-sm text-ink-muted">
-            {mode === "signin" ? "New to CMFB? " : "Already a member? "}
+            {mode === "signin" ? "New to Confidential Bank? " : "Already a member? "}
             <button
               onClick={() => {
                 setMode(mode === "signin" ? "signup" : "signin");

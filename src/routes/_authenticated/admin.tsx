@@ -18,6 +18,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
+// Normalized uppercase list for display
 const STATUSES: AccountStatus[] = ["PENDING", "RESTRICTED", "ACTIVE"];
 
 function AdminPage() {
@@ -52,6 +53,9 @@ function AdminPage() {
 
   if (isLoading || !data) return <Skeletons rows={4} />;
 
+  const profiles = data.profiles ?? [];
+  const auditLogs = data.audit ?? [];
+
   return (
     <div>
       <PageHeader
@@ -72,47 +76,54 @@ function AdminPage() {
               </tr>
             </thead>
             <tbody>
-              {data.profiles.map((p) => (
-                <tr key={p.id} className="border-b border-line/60 last:border-0">
-                  <td className="px-5 py-3">
-                    <p className="text-ink">{p.full_name || "Member"}</p>
-                    <p className="text-xs text-ink-muted">{p.email}</p>
-                  </td>
-                  <td className="whitespace-nowrap px-5 py-3 text-ink-muted">{longDate(p.created_at)}</td>
-                  <td className="px-5 py-3">
-                    <span
-                      className={
-                        p.status === "ACTIVE"
-                          ? "rounded-full bg-success-soft px-3 py-1 text-[11px] font-semibold text-success"
-                          : p.status === "PENDING"
-                            ? "rounded-full bg-warning-soft px-3 py-1 text-[11px] font-semibold text-warning"
-                            : "rounded-full bg-danger-soft px-3 py-1 text-[11px] font-semibold text-danger"
-                      }
-                    >
-                      {p.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    <div className="inline-flex gap-1">
-                      {STATUSES.map((s) => (
-                        <button
-                          key={s}
-                          disabled={s === p.status}
-                          onClick={() =>
-                            adminSetStatus(p.id, s).then(() => {
-                              queryClient.invalidateQueries({ queryKey: adminKey });
-                              queryClient.invalidateQueries({ queryKey: overviewKey });
-                            })
-                          }
-                          className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:border-brand hover:text-brand disabled:opacity-40"
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {profiles.map((p: any) => {
+                // Normalize database status ('active') to uppercase ('ACTIVE')
+                const normalizedStatus = (p.status || "active").toUpperCase() as AccountStatus;
+
+                return (
+                  <tr key={p.id} className="border-b border-line/60 last:border-0">
+                    <td className="px-5 py-3">
+                      <p className="text-ink">{p.full_name || p.email || "Member"}</p>
+                      <p className="text-xs text-ink-muted">{p.email}</p>
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-3 text-ink-muted">
+                      {p.created_at ? longDate(p.created_at) : "N/A"}
+                    </td>
+                    <td className="px-5 py-3">
+                      <span
+                        className={
+                          normalizedStatus === "ACTIVE"
+                            ? "rounded-full bg-success-soft px-3 py-1 text-[11px] font-semibold text-success"
+                            : normalizedStatus === "PENDING"
+                              ? "rounded-full bg-warning-soft px-3 py-1 text-[11px] font-semibold text-warning"
+                              : "rounded-full bg-danger-soft px-3 py-1 text-[11px] font-semibold text-danger"
+                        }
+                      >
+                        {normalizedStatus}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      <div className="inline-flex gap-1">
+                        {STATUSES.map((s) => (
+                          <button
+                            key={s}
+                            disabled={s === normalizedStatus}
+                            onClick={() =>
+                              adminSetStatus(p.id, s.toLowerCase() as any).then(() => {
+                                queryClient.invalidateQueries({ queryKey: adminKey });
+                                queryClient.invalidateQueries({ queryKey: overviewKey });
+                              })
+                            }
+                            className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:border-brand hover:text-brand disabled:opacity-40"
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -121,15 +132,15 @@ function AdminPage() {
       <section className="reveal panel p-6">
         <h2 className="font-display text-lg text-ink">Audit trail</h2>
         <ul className="mt-4 space-y-3">
-          {data.audit.map((log) => (
+          {auditLogs.map((log: any) => (
             <li key={log.id} className="border-b border-line/60 pb-3 last:border-0 last:pb-0">
-              <p className="text-sm text-ink">{log.detail}</p>
+              <p className="text-sm text-ink">{log.detail || log.action || "System action logged"}</p>
               <p className="mt-1 text-xs text-ink-muted">
-                {log.action} · {longDate(log.created_at)}
+                {log.action} · {log.created_at ? longDate(log.created_at) : "N/A"}
               </p>
             </li>
           ))}
-          {data.audit.length === 0 && <li className="text-sm text-ink-muted">Nothing recorded yet.</li>}
+          {auditLogs.length === 0 && <li className="text-sm text-ink-muted">Nothing recorded yet.</li>}
         </ul>
       </section>
     </div>

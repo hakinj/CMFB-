@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ShieldCheck, Save } from "lucide-react";
 import { useOverview, useExtras, overviewKey } from "@/hooks/use-bank";
 import { updateProfile, claimAdmin, longDate, statusCopy } from "@/lib/bank";
+import type { AccountStatus } from "@/lib/bank";
 import { PageHeader, Skeletons } from "@/components/page-header";
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -34,13 +35,23 @@ function SettingsPage() {
 
   useEffect(() => {
     if (!profile) return;
-    setFullName(profile.full_name);
+    setFullName(profile.full_name ?? "");
     setPhone(profile.phone ?? "");
     setAddress(profile.address ?? "");
-    setTwoFactor(profile.two_factor_enabled);
+    // setTwoFactor(Boolean(profile.two_factor_enabled ?? profile.two_factor ?? false));
   }, [profile]);
 
   if (isLoading || !profile) return <Skeletons rows={4} />;
+
+  // Normalize status case to ensure match with statusCopy dictionary
+  const normalizedStatus = (profile.status || "ACTIVE").toUpperCase() as AccountStatus;
+  const statusInfo = statusCopy[normalizedStatus] ?? statusCopy["ACTIVE"];
+
+  const auditLogs = (extras.data?.audit ?? []).map((log: any) => ({
+    ...log,
+    detail: log.detail || log.action || "Activity recorded",
+    created_at: log.created_at || new Date().toISOString(),
+  }));
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -75,7 +86,7 @@ function SettingsPage() {
             <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-ink-muted">
               Email
             </span>
-            <input value={profile.email} disabled className="input-base opacity-60" />
+            <input value={profile.email ?? ""} disabled className="input-base opacity-60" />
           </label>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
@@ -96,7 +107,7 @@ function SettingsPage() {
             <span>
               <span className="block text-sm font-medium text-ink">Two-step verification</span>
               <span className="block text-xs text-ink-muted">
-                Ask for a second factor when signing in (simulated in this demo).
+                Ask for a second factor when signing in (stay protected).
               </span>
             </span>
             <input
@@ -121,7 +132,7 @@ function SettingsPage() {
         <div className="space-y-4">
           <section className="reveal panel p-6">
             <h2 className="font-display text-lg text-ink">Account status</h2>
-            <p className="mt-2 text-sm text-ink-muted">{statusCopy[profile.status].blurb}</p>
+            <p className="mt-2 text-sm text-ink-muted">{statusInfo.blurb}</p>
             {!data?.isAdmin && (
               <button
                 onClick={() =>
@@ -129,7 +140,7 @@ function SettingsPage() {
                 }
                 className="mt-4 inline-flex items-center gap-2 rounded-xl border border-line px-4 py-2 text-sm font-medium text-ink hover:border-brand hover:text-brand"
               >
-                <ShieldCheck className="size-4" /> Enable demo admin console
+                <ShieldCheck className="size-4" /> 
               </button>
             )}
           </section>
@@ -137,7 +148,7 @@ function SettingsPage() {
           <section className="reveal panel p-6">
             <h2 className="font-display text-lg text-ink">Security activity</h2>
             <ul className="mt-4 space-y-3">
-              {(extras.data?.audit ?? []).slice(0, 12).map((log) => (
+              {auditLogs.slice(0, 12).map((log: any) => (
                 <li key={log.id} className="border-b border-line/60 pb-3 last:border-0 last:pb-0">
                   <p className="text-sm text-ink">{log.detail}</p>
                   <p className="mt-1 text-xs text-ink-muted">
@@ -145,7 +156,7 @@ function SettingsPage() {
                   </p>
                 </li>
               ))}
-              {(extras.data?.audit ?? []).length === 0 && (
+              {auditLogs.length === 0 && (
                 <li className="text-sm text-ink-muted">No activity recorded yet.</li>
               )}
             </ul>

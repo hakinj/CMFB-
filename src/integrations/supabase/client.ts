@@ -9,30 +9,40 @@ function isNewSupabaseApiKey(value: string): boolean {
 
 function createSupabaseFetch(supabaseKey: string): typeof fetch {
   return (input, init) => {
-    const headers = new Headers(
-      typeof Request !== 'undefined' && input instanceof Request ? input.headers : undefined,
-    );
+    // 1. Create a clean, unified Headers instance safely
+    const headers = new Headers();
 
+    // 2. Preserve any existing request headers from input (if input is a Request object)
+    if (typeof Request !== 'undefined' && input instanceof Request) {
+      input.headers.forEach((value, key) => headers.set(key, value));
+    }
+
+    // 3. Merge headers passed via fetch options (`init.headers`)
     if (init?.headers) {
       new Headers(init.headers).forEach((value, key) => headers.set(key, value));
     }
 
-    // New Supabase API keys are opaque strings, not bearer JWTs.
+    // 4. Remove conflicting Authorization header if using the new key format
     if (isNewSupabaseApiKey(supabaseKey) && headers.get('Authorization') === `Bearer ${supabaseKey}`) {
       headers.delete('Authorization');
     }
 
+    // 5. Explicitly inject the apikey header required by Supabase
     headers.set('apikey', supabaseKey);
-    return fetch(input, { ...init, headers });
+
+    // 6. Execute fetch with the clean, safely formatted headers
+    return fetch(input, {
+      ...init,
+      headers,
+    });
   };
 }
 
-
 function createSupabaseClient() {
-  // Use import.meta.env for client-side (Vite build-time replacement)
-  // Fall back to process.env for SSR (server-side rendering)
-  const SUPABASE_URL = import.meta.env['VITE_SUPABASE_URL'] || process.env['SUPABASE_URL'];
-  const SUPABASE_PUBLISHABLE_KEY = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || process.env['SUPABASE_PUBLISHABLE_KEY'];
+  const env = (typeof process !== 'undefined' ? process.env : {}) as Record<string, string | undefined>;
+  
+  const SUPABASE_URL = import.meta.env['VITE_SUPABASE_URL'] || env['SUPABASE_URL'];
+  const SUPABASE_PUBLISHABLE_KEY = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || env['SUPABASE_PUBLISHABLE_KEY'];
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [
@@ -66,4 +76,3 @@ export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>,
     return Reflect.get(_supabase, prop, receiver);
   },
 });
-

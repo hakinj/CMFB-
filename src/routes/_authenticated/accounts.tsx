@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/accounts")({
       { property: "og:description", content: "Deposit accounts, balances and routing details." },
     ],
   }),
-  component: AccountsPage,
+   component: AccountsPage,
 });
 
 function AccountsPage() {
@@ -21,18 +21,53 @@ function AccountsPage() {
 
   if (isLoading || !data?.profile) return <Skeletons rows={3} />;
 
+  const accounts = data.accounts ?? [];
+  const rawTransactions = data.transactions ?? [];
+
+
+
+
   return (
     <div>
       <PageHeader
         title="Accounts"
         subtitle="Every deposit account held with Confidential Micro Finance Bank."
       />
-      <StatusNotice status={data.profile.status} blurb={statusCopy[data.profile.status].blurb} />
+      {data.profile.status && statusCopy[data.profile.status] && (
+        <StatusNotice status={data.profile.status} blurb={statusCopy[data.profile.status].blurb} />
+      )}
+
+      
 
       <div className="grid gap-4 md:grid-cols-2">
-        {data.accounts.map((account) => {
-          const recent = data.transactions.filter((t) => t.account_id === account.id).slice(0, 4);
-          const Icon = account.kind === "savings" ? PiggyBank : Landmark;
+        {accounts.map((rawAccount: any) => {
+          // Fallback mappings for dynamic database columns
+          const account = {
+            ...rawAccount,
+            kind: rawAccount.kind || rawAccount.account_type?.toLowerCase() || "checking",
+            name: rawAccount.name || `${rawAccount.account_type || "Checking"} Account`,
+            routing_number: rawAccount.routing_number || "121000358",
+            currency: rawAccount.currency || "USD",
+          };
+
+          const recent = rawTransactions
+            .filter((t: any) => t.account_id === account.id)
+            .slice(0, 4)
+            .map((t: any) => {
+              const isCredit =
+                t.direction === "credit" ||
+                t.type === "credit" ||
+                t.type === "INCOMING" ||
+                t.type === "CREDIT";
+
+              return {
+                ...t,
+                direction: isCredit ? ("credit" as const) : ("debit" as const),
+              };
+            });
+
+          const Icon = account.kind.includes("saving") ? PiggyBank : Landmark;
+
           return (
             <section key={account.id} className="reveal panel p-6">
               <div className="flex items-start justify-between gap-3">
@@ -45,7 +80,9 @@ function AccountsPage() {
                     <p className="text-xs uppercase tracking-wide text-ink-muted">{account.kind}</p>
                   </div>
                 </div>
-                <p className="numeral font-display text-2xl text-ink">{money(account.balance, account.currency)}</p>
+                <p className="numeral font-display text-2xl text-ink">
+                  {money(account.balance, account.currency)}
+                </p>
               </div>
 
               <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-line pt-4 text-sm">

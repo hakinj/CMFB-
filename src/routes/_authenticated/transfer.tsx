@@ -81,7 +81,7 @@ function TransferPage() {
             >
               {data.accounts.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.name} · {maskAccount(a.account_number)} · {money(a.balance, a.currency)}
+                  {a.id} · {maskAccount(a.account_number)} · {money(a.balance, a.currency)}
                 </option>
               ))}
             </select>

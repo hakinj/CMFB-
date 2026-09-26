@@ -1,8 +1,11 @@
-@import "tailwindcss" source(none);
-@source "../src";
+@import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/* Tell Tailwind v4 where to scan for class names (optional in standard layouts) */
+@source "../src";
+
+/* Tailwind v4 dark mode variant definition */
+@custom-variant dark (&:where(.dark, .dark *));
 
 /*
  * Confidential Micro Finance Bank — design system.

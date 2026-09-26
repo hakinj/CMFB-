@@ -1,0 +1,65 @@
+column_name;data_type;is_nullable;table_name
+id;uuid;NO;accounts
+user_id;uuid;NO;accounts
+name;text;NO;accounts
+kind;text;NO;accounts
+account_number;text;NO;accounts
+routing_number;text;NO;accounts
+balance;numeric;NO;accounts
+currency;text;NO;accounts
+created_at;timestamp with time zone;NO;accounts
+id;uuid;NO;audit_logs
+user_id;uuid;YES;audit_logs
+action;text;NO;audit_logs
+detail;text;NO;audit_logs
+severity;text;NO;audit_logs
+created_at;timestamp with time zone;NO;audit_logs
+id;uuid;NO;beneficiaries
+user_id;uuid;NO;beneficiaries
+name;text;NO;beneficiaries
+bank_name;text;NO;beneficiaries
+account_number;text;NO;beneficiaries
+nickname;text;YES;beneficiaries
+created_at;timestamp with time zone;NO;beneficiaries
+id;uuid;NO;cards
+user_id;uuid;NO;cards
+account_id;uuid;YES;cards
+label;text;NO;cards
+brand;text;NO;cards
+last4;text;NO;cards
+exp_month;integer;NO;cards
+exp_year;integer;NO;cards
+card_type;text;NO;cards
+frozen;boolean;NO;cards
+monthly_limit;numeric;NO;cards
+created_at;timestamp with time zone;NO;cards
+id;uuid;NO;notifications
+user_id;uuid;NO;notifications
+title;text;NO;notifications
+body;text;NO;notifications
+kind;text;NO;notifications
+read;boolean;NO;notifications
+created_at;timestamp with time zone;NO;notifications
+id;uuid;NO;profiles
+email;text;NO;profiles
+full_name;text;NO;profiles
+phone;text;YES;profiles
+address;text;YES;profiles
+status;USER-DEFINED;NO;profiles
+two_factor_enabled;boolean;NO;profiles
+created_at;timestamp with time zone;NO;profiles
+id;uuid;NO;transactions
+user_id;uuid;NO;transactions
+account_id;uuid;NO;transactions
+direction;USER-DEFINED;NO;transactions
+amount;numeric;NO;transactions
+description;text;NO;transactions
+category;text;NO;transactions
+counterparty;text;YES;transactions
+state;USER-DEFINED;NO;transactions
+reference;text;NO;transactions
+balance_after;numeric;NO;transactions
+created_at;timestamp with time zone;NO;transactions
+id;uuid;NO;user_roles
+user_id;uuid;NO;user_roles
+role;USER-DEFINED;NO;user_roles

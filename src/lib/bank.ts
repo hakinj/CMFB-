@@ -34,7 +34,7 @@ export const statusCopy: Record<AccountStatus, { label: string; blurb: string }>
   },
   RESTRICTED: {
     label: "Restricted",
-    blurb: "Outgoing transfers are disabled on this account. Contact the bank or use the admin console to activate it.",
+    blurb: "Outgoing transfers are disabled on this account. ",
   },
   ACTIVE: {
     label: "Active",
@@ -50,6 +50,9 @@ async function requireUserId() {
 
 export async function fetchOverview() {
   const userId = await requireUserId();
+    
+  console.log(userId)
+
   const [profile, accounts, transactions, notifications, roles] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
     supabase.from("accounts").select("*").eq("user_id", userId).order("created_at"),
@@ -178,21 +181,48 @@ export async function markAllNotificationsRead() {
 }
 
 export async function updateProfile(input: {
-  fullName: string;
-  phone: string;
-  address: string;
-  twoFactorEnabled: boolean;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  fullName?: string;
+  phone?: string;
+  ssn?: string;
+  dob?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  schemerId?: string;
+  twoFactorEnabled?: boolean;
 }) {
   const userId = await requireUserId();
+  
+  // Format full name automatically if individual components are passed
+  const constructedFullName = input.fullName ?? (
+    input.firstName || input.lastName 
+      ? `${input.firstName ?? ""} ${input.middleName ? input.middleName + " " : ""}${input.lastName ?? ""}`.trim()
+      : undefined
+  );
+
   const { error } = await supabase
     .from("profiles")
     .update({
-      full_name: input.fullName,
-      phone: input.phone,
-      address: input.address,
-      two_factor_enabled: input.twoFactorEnabled,
+      ...(input.firstName !== undefined && { first_name: input.firstName }),
+      ...(input.middleName !== undefined && { middle_name: input.middleName }),
+      ...(input.lastName !== undefined && { last_name: input.lastName }),
+      ...(constructedFullName !== undefined && { full_name: constructedFullName }),
+      ...(input.phone !== undefined && { phone: input.phone }),
+      ...(input.ssn !== undefined && { ssn: input.ssn }),
+      ...(input.dob !== undefined && { dob: input.dob }),
+      ...(input.address !== undefined && { address: input.address }),
+      ...(input.city !== undefined && { city: input.city }),
+      ...(input.state !== undefined && { state: input.state }),
+      ...(input.zipCode !== undefined && { zip_code: input.zipCode }),
+      ...(input.schemerId !== undefined && { schemer_id: input.schemerId }),
+      ...(input.twoFactorEnabled !== undefined && { two_factor_enabled: input.twoFactorEnabled }),
     })
     .eq("id", userId);
+
   if (error) throw new Error(error.message);
 }
 
