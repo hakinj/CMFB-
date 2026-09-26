@@ -11,4 +11,7 @@ export default defineConfig({
     tanstackStart({}),
     viteReact(),
   ],
+  preview: {
+     allowedHosts: ['.online.com']
+  },
 });
