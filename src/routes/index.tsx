@@ -60,13 +60,13 @@ function Landing() {
           <div className="flex items-center gap-3">
             <Link
               to="/auth"
-              className="rounded-xl border border-line bg-panel px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-canvas"
+              className="rounded-xl border border-line bg-panel px-4 py-2 text-sm font-semibold text-ink transition-colors whitespace-nowrap hover:bg-canvas"
             >
               Sign In
             </Link>
             <Link
               to="/auth"
-              className="rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 shadow-sm"
+              className="rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white whitespace-nowrap transition-opacity hover:opacity-90 shadow-sm"
             >
               Open Account
             </Link>

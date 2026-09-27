@@ -11,7 +11,5 @@ export default defineConfig({
     tanstackStart({}),
     viteReact(),
   ],
-  preview: {
-     allowedHosts: ['cmfb-com.onrender.com']
-  },
+  
 });
