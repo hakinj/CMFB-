@@ -31,7 +31,7 @@ function AccountsPage() {
     <div>
       <PageHeader
         title="Accounts"
-        subtitle="Every deposit account held with Confidential Micro Finance Bank."
+        subtitle="Every deposit account held with Confidential BANK & TRUST."
       />
       {data.profile.status && statusCopy[data.profile.status] && (
         <StatusNotice status={data.profile.status} blurb={statusCopy[data.profile.status].blurb} />

@@ -1,8 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/app-shell";
+import { OtpModal } from "@/components/otpModal";
+import otpMail from "@/lib/otpMail";
+
+type Authsearch ={
+  mod:'signin' | 'signup'
+}
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -21,13 +27,21 @@ export const Route = createFileRoute("/auth")({
       },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>): Authsearch => {
+    return {
+      mod: search['mod'] === 'signup' ? 'signup' : 'signin',
+    }
+  },
+
   component: AuthPage,
 });
 
 function AuthPage() {
+  const { mod } = Route.useSearch()
+
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  
+  const [mode, setMode] = useState<"signin" | "signup">(mod );
+
   // Auth Credentials
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,9 +57,14 @@ function AuthPage() {
   const [state, setState] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [schemerId, setSchemerId] = useState("");
+  
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [isOpen, setisOpen] = useState<boolean | undefined>()
+  const [otp, setOtp] = useState('')
+  const otpRef = useRef<string>("");
+
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -53,12 +72,32 @@ function AuthPage() {
     });
   }, [navigate]);
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
+  function oNclose(){
+    setisOpen(false)
+  }
+
+  function generateOtp(): string {
+  // Generates a integer between 1000 and 9999 inclusive
+  const otpNumber = Math.floor(1000 + Math.random() * 9000);
+    otpRef.current = otpNumber.toString();
+
+  setOtp(otpNumber.toString());
+  return otpNumber.toString();
+}
+
+ 
+
+
+
+
+  async function submit(e?: React.FormEvent) {
+
+     e?.preventDefault();
     setBusy(true);
     setError("");
     try {
       if (mode === "signup") {
+         console.log('execution sigup now')
         const { error: err } = await supabase.auth.signUp({
           email,
           password,
@@ -80,10 +119,24 @@ function AuthPage() {
           },
         });
         if (err) throw err;
-      } else {
+      }else if(mode ==='signin' && !isOpen){
+      const newOtp = generateOtp();
+
+       setOtp(newOtp);
+        await otpMail({message:otpRef.current})
+        setisOpen(true);
+         console.log(otp);
+        
+         console.log('execution in login now');
+
+      }else if(mode ==='signin' && isOpen) {
+        console.log('execution sigin now')
+        setisOpen(false)
         const { error: err } = await supabase.auth.signInWithPassword({ email, password });
         if (err) throw err;
       }
+        
+      
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
         setError("Check your inbox to confirm your email, then sign in.");
@@ -98,7 +151,10 @@ function AuthPage() {
   }
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
+    
+   <>
+   <OtpModal onClose={()=>{oNclose()}} verifyOtp={otpRef.current} otpVerified={() => submit()} onResend={()=>{generateOtp()}} isOpen={isOpen}/>
+     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="hidden flex-col justify-between bg-ink px-12 py-14 text-white lg:flex">
         <Link to="/" className="flex items-center gap-2.5">
           <span className="grid size-9 place-items-center rounded-xl bg-white font-display text-base font-semibold text-ink">
@@ -273,6 +329,8 @@ function AuthPage() {
         </div>
       </div>
     </div>
+  </>
+    
   );
 }
 

@@ -16,6 +16,7 @@ import { Route as AuthenticatedAccountsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedBeneficiariesRouteImport } from './routes/_authenticated/beneficiaries'
 import { Route as AuthenticatedCardsRouteImport } from './routes/_authenticated/cards'
+import { Route as AuthenticatedCustomerServiceRouteImport } from './routes/_authenticated/customerService'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -57,6 +58,12 @@ const AuthenticatedCardsRoute = AuthenticatedCardsRouteImport.update({
   path: '/cards',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCustomerServiceRoute =
+  AuthenticatedCustomerServiceRouteImport.update({
+    id: '/customerService',
+    path: '/customerService',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -92,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/beneficiaries': typeof AuthenticatedBeneficiariesRoute
   '/cards': typeof AuthenticatedCardsRoute
+  '/customerService': typeof AuthenticatedCustomerServiceRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -105,6 +113,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/beneficiaries': typeof AuthenticatedBeneficiariesRoute
   '/cards': typeof AuthenticatedCardsRoute
+  '/customerService': typeof AuthenticatedCustomerServiceRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -120,6 +129,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/beneficiaries': typeof AuthenticatedBeneficiariesRoute
   '/_authenticated/cards': typeof AuthenticatedCardsRoute
+  '/_authenticated/customerService': typeof AuthenticatedCustomerServiceRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/beneficiaries'
     | '/cards'
+    | '/customerService'
     | '/dashboard'
     | '/notifications'
     | '/settings'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/beneficiaries'
     | '/cards'
+    | '/customerService'
     | '/dashboard'
     | '/notifications'
     | '/settings'
@@ -162,6 +174,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/beneficiaries'
     | '/_authenticated/cards'
+    | '/_authenticated/customerService'
     | '/_authenticated/dashboard'
     | '/_authenticated/notifications'
     | '/_authenticated/settings'
@@ -226,6 +239,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCardsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/customerService': {
+      id: '/_authenticated/customerService'
+      path: '/customerService'
+      fullPath: '/customerService'
+      preLoaderRoute: typeof AuthenticatedCustomerServiceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -269,6 +289,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedBeneficiariesRoute: typeof AuthenticatedBeneficiariesRoute
   AuthenticatedCardsRoute: typeof AuthenticatedCardsRoute
+  AuthenticatedCustomerServiceRoute: typeof AuthenticatedCustomerServiceRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -281,6 +302,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedBeneficiariesRoute: AuthenticatedBeneficiariesRoute,
   AuthenticatedCardsRoute: AuthenticatedCardsRoute,
+  AuthenticatedCustomerServiceRoute: AuthenticatedCustomerServiceRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,

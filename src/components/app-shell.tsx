@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Menu,
   LogOut,
+  Headset ,
   X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +29,7 @@ const NAV = [
   { to: "/cards", label: "Cards", icon: CreditCard },
   { to: "/beneficiaries", label: "Beneficiaries", icon: Users },
   { to: "/notifications", label: "Notifications", icon: Bell },
+  { to: "/customerService", label: "customer care", icon: Headset },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
@@ -43,7 +45,7 @@ export function Logo({ compact = false }: { compact?: boolean }) {
             Confidential
           </span>
           <span className="block text-[10px] uppercase tracking-[0.18em] text-ink-muted">
-            Micro Finance Bank
+            BANK & TRUST
           </span>
         </span>
       )}
@@ -75,7 +77,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    navigate({ to: "/auth", search: { mod: 'signin' }, replace: true });
   }
 
   const unread = data?.notifications.filter((n) => !n.read).length ?? 0;

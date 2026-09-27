@@ -60,12 +60,14 @@ function Landing() {
           <div className="flex items-center gap-3">
             <Link
               to="/auth"
+               search={{mod:'signin'}}
               className="rounded-xl border border-line bg-panel px-4 py-2 text-sm font-semibold text-ink transition-colors whitespace-nowrap hover:bg-canvas"
             >
               Sign In
             </Link>
             <Link
               to="/auth"
+              search={{mod:'signup'}}
               className="rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white whitespace-nowrap transition-opacity hover:opacity-90 shadow-sm"
             >
               Open Account
@@ -97,12 +99,14 @@ function Landing() {
             <div className="mt-8 flex flex-wrap gap-4">
               <Link
                 to="/auth"
+                  search={{mod:'signup'}}
                 className="inline-flex items-center gap-2 rounded-xl bg-brand px-6 py-3.5 text-sm font-semibold text-white transition-all hover:bg-emerald-600 shadow-lg shadow-brand/20"
               >
                 Open an Account Today <ArrowRight className="size-4" />
               </Link>
               <Link
                 to="/auth"
+                  search={{mod:'signin'}}
                 className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-md hover:bg-white/20 transition-colors"
               >
                 Online Banking Sign In
@@ -272,44 +276,44 @@ function Landing() {
             <div>
               <p className="font-semibold uppercase tracking-wider text-ink mb-4">Personal Banking</p>
               <ul className="space-y-2.5 text-ink-muted">
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Checking Accounts</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">High-Yield Savings</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Certificates of Deposit (CDs)</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Visa® Debit Cards</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Mortgages & Home Equity</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}} className="hover:text-ink transition-colors">Checking Accounts</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}} className="hover:text-ink transition-colors">High-Yield Savings</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}} className="hover:text-ink transition-colors">Certificates of Deposit (CDs)</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}} className="hover:text-ink transition-colors">Visa® Debit Cards</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}} className="hover:text-ink transition-colors">Mortgages & Home Equity</Link></li>
               </ul>
             </div>
 
             <div>
               <p className="font-semibold uppercase tracking-wider text-ink mb-4">Commercial Banking</p>
               <ul className="space-y-2.5 text-ink-muted">
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Business Checking</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Treasury & Payroll</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Merchant Services</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Commercial Lending</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">SBA Loans</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}} className="hover:text-ink transition-colors">Business Checking</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}} className="hover:text-ink transition-colors">Treasury & Payroll</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}} className="hover:text-ink transition-colors">Merchant Services</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}} className="hover:text-ink transition-colors">Commercial Lending</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}} className="hover:text-ink transition-colors">SBA Loans</Link></li>
               </ul>
             </div>
 
             <div>
               <p className="font-semibold uppercase tracking-wider text-ink mb-4">Regulatory & Safety</p>
               <ul className="space-y-2.5 text-ink-muted">
-                <li><Link to="/auth" className="hover:text-ink transition-colors">FDIC Coverage Info</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">USA PATRIOT Act Notice</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Security & Anti-Fraud</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Privacy Notice</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Online Banking Guarantee</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}} className="hover:text-ink transition-colors">FDIC Coverage Info</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}} className="hover:text-ink transition-colors">USA PATRIOT Act Notice</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}} className="hover:text-ink transition-colors">Security & Anti-Fraud</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}} className="hover:text-ink transition-colors">Privacy Notice</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}} className="hover:text-ink transition-colors">Online Banking Guarantee</Link></li>
               </ul>
             </div>
 
             <div>
               <p className="font-semibold uppercase tracking-wider text-ink mb-4">Support & Disclosures</p>
               <ul className="space-y-2.5 text-ink-muted">
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Branch & ATM Finder</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Fee Schedule & Disclosures</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Routing Numbers (ABA)</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Accessibility Statement</Link></li>
-                <li><Link to="/auth" className="hover:text-ink transition-colors">Ethics & Whistleblower</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}}  className="hover:text-ink transition-colors">Branch & ATM Finder</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}}  className="hover:text-ink transition-colors">Fee Schedule & Disclosures</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}}  className="hover:text-ink transition-colors">Routing Numbers (ABA)</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}}  className="hover:text-ink transition-colors">Accessibility Statement</Link></li>
+                <li><Link to="/auth" search={{mod:'signin'}}  className="hover:text-ink transition-colors">Ethics & Whistleblower</Link></li>
               </ul>
             </div>
           </div>
