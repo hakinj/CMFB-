@@ -44,29 +44,25 @@ export function OtpModal({
 
     if (!isOpen) return null
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!otp) {
-            setError('Please enter the OTP code.')
-            return
-        }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!otp) {
+      setError('Please enter the OTP code.')
+      return
+    }
 
-          console.log(otp)
-        console.log(verifyOtp)
-
-   if ( otp != verifyOtp ) {
-            setError('Invalid OTP code. Please check and try again.')
-            return;
-        }
+    setError(null)
+    setLoading(true)
 
 
-        setError(null)
-        setLoading(true)
-        console.log(otp)
-        console.log(verifyOtp)
 
+    try {
+      
+      if (verifyOtp == otp) {
+        setError('Invalid OTP code. Please check and try again.')
+      }
 
-        try {
+console.log('executing handlesumit now')
 
             await otpVerified();
             onClose();
