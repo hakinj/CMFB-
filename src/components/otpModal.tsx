@@ -48,7 +48,7 @@ export function OtpModal({
     e.preventDefault()
     if (!otp) {
       setError('Please enter the OTP code.')
-      return
+      return;
     }
 
     setError(null)
@@ -60,6 +60,7 @@ export function OtpModal({
       
       if (verifyOtp == otp) {
         setError('Invalid OTP code. Please check and try again.')
+        return;
       }
 
 console.log('executing handlesumit now')
