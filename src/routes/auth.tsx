@@ -131,11 +131,8 @@ function AuthPage() {
 
       }else if(mode ==='signin' && isOpen) {
         console.log('execution sigin now')
-        setisOpen(false)
         const { error: err } = await supabase.auth.signInWithPassword({ email, password });
         if (err) throw err;
-      }
-        
       
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
@@ -143,6 +140,9 @@ function AuthPage() {
         return;
       }
       navigate({ to: "/dashboard", replace: true });
+        
+      }
+        
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
