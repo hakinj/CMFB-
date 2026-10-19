@@ -100,7 +100,7 @@ export const transactions = pgTable("transactions", {
   counterparty: text("counterparty"),
   state: transactionStateEnum("state").notNull(),
   reference: text("reference").notNull(),
-  balanceAfter: numeric("balance_after").notNull(),
+  balanceAfter: numeric("balance_after"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

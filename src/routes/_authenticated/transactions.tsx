@@ -71,7 +71,7 @@ function TransactionsPage() {
 
       <div className="reveal panel overflow-hidden">
         <div className="flex flex-wrap items-center gap-3 border-b border-line p-4">
-          <div className="relative min-w-[220px] flex-1">
+          <div className="relative min-w-55 flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-muted" />
             <input
               value={query}
@@ -97,51 +97,122 @@ function TransactionsPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-sm">
-            <thead>
-              <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-ink-muted">
-                <th className="px-4 py-3 font-medium">Date</th>
-                <th className="px-4 py-3 font-medium">Description</th>
-                <th className="px-4 py-3 font-medium">Category</th>
-                <th className="px-4 py-3 font-medium">Reference</th>
-                <th className="px-4 py-3 text-right font-medium">Amount</th>
-                <th className="px-4 py-3 text-right font-medium">Balance</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((t) => (
-                <tr key={t.id} className="border-b border-line/60 last:border-0">
-                  <td className="whitespace-nowrap px-4 py-3 text-ink-muted">{longDate(t.created_at)}</td>
-                  <td className="px-4 py-3">
-                    <p className="text-ink">{t.description}</p>
-                    {t.counterparty && <p className="text-xs text-ink-muted">{t.counterparty}</p>}
-                  </td>
-                  <td className="px-4 py-3 text-ink-muted">{t.category}</td>
-                  <td className="numeral px-4 py-3 text-xs text-ink-muted">{t.reference}</td>
-                  <td
-                    className={
-                      t.direction === "credit"
-                        ? "numeral px-4 py-3 text-right font-medium text-success"
-                        : "numeral px-4 py-3 text-right font-medium text-ink"
-                    }
-                  >
-                    {t.direction === "credit" ? "+" : "−"}
-                    {money(t.amount)}
-                  </td>
-                  <td className="numeral px-4 py-3 text-right text-ink-muted">{money(t.balance_after)}</td>
-                </tr>
-              ))}
-              {rows.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-sm text-ink-muted">
-                    No transactions match your search.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div className="w-full">
+  {/* MOBILE VIEW (Stacked List / Card Layout) */}
+  <div className="block divide-y divide-line/60 md:hidden">
+    {rows.map((t) => (
+      <div key={t.id} className="flex items-center justify-between gap-3 py-3.5 px-1">
+        {/* Left Side: Category Badge, Description & Date */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="truncate font-medium text-ink text-sm">
+              {t.description}
+            </span>
+            {t.category && (
+              <span className="shrink-0 rounded-full bg-line/40 px-2 py-0.5 text-[10px] font-medium text-ink-muted uppercase tracking-wider">
+                {t.category}
+              </span>
+            )}
+          </div>
+          <div className="mt-1 flex items-center gap-2 text-xs text-ink-muted">
+            <span className="whitespace-nowrap">{longDate(t.created_at)}</span>
+            {t.counterparty && (
+              <>
+                <span>•</span>
+                <span className="truncate">{t.counterparty}</span>
+              </>
+            )}
+          </div>
         </div>
+
+        {/* Right Side: Amount & Running Balance */}
+        <div className="shrink-0 text-right whitespace-nowrap">
+          <p
+            className={`numeral text-sm font-semibold ${
+              t.direction === "credit" ? "text-success" : "text-ink"
+            }`}
+          >
+            {t.direction === "credit" ? "+" : "−"}
+            {money(t.amount)}
+          </p>
+          <p className="numeral text-xs text-ink-muted mt-0.5">
+            Bal: {money(t.balance_after)}
+          </p>
+        </div>
+      </div>
+    ))}
+
+    {rows.length === 0 && (
+      <div className="py-10 text-center text-sm text-ink-muted">
+        No transactions match your search.
+      </div>
+    )}
+  </div>
+
+  {/* DESKTOP VIEW (Full Table with Single-Line Enforcements) */}
+  <div className="hidden overflow-x-auto md:block">
+    <table className="w-full min-w-[700px] text-sm table-fixed">
+      <thead>
+        <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-ink-muted">
+          <th className="w-[18%] px-4 py-3 font-medium whitespace-nowrap">Date</th>
+          <th className="w-[28%] px-4 py-3 font-medium whitespace-nowrap">Description</th>
+          <th className="w-[14%] px-4 py-3 font-medium whitespace-nowrap">Category</th>
+          <th className="w-[16%] px-4 py-3 font-medium whitespace-nowrap">Reference</th>
+          <th className="w-[12%] px-4 py-3 text-right font-medium whitespace-nowrap">Amount</th>
+          <th className="w-[12%] px-4 py-3 text-right font-medium whitespace-nowrap">Balance</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-line/60">
+        {rows.map((t) => (
+          <tr key={t.id} className="hover:bg-line/20 transition-colors">
+            <td className="whitespace-nowrap px-4 py-3.5 text-xs text-ink-muted">
+              {longDate(t.created_at)}
+            </td>
+            <td className="px-4 py-3.5 max-w-0">
+              <p className="truncate font-medium text-ink" title={t.description}>
+                {t.description}
+              </p>
+              {t.counterparty && (
+                <p className="truncate text-xs text-ink-muted" title={t.counterparty}>
+                  {t.counterparty}
+                </p>
+              )}
+            </td>
+            <td className="px-4 py-3.5 max-w-0">
+              <span className="truncate block text-xs text-ink-muted" title={t.category}>
+                {t.category}
+              </span>
+            </td>
+            <td className="numeral px-4 py-3.5 max-w-0 text-xs text-ink-muted">
+              <span className="truncate block font-mono" title={t.reference}>
+                {t.reference}
+              </span>
+            </td>
+            <td
+              className={`numeral px-4 py-3.5 text-right font-medium whitespace-nowrap ${
+                t.direction === "credit" ? "text-success" : "text-ink"
+              }`}
+            >
+              {t.direction === "credit" ? "+" : "−"}
+              {money(t.amount)}
+            </td>
+            <td className="numeral px-4 py-3.5 text-right text-ink-muted whitespace-nowrap">
+              {money(t.balance_after)}
+            </td>
+          </tr>
+        ))}
+
+        {rows.length === 0 && (
+          <tr>
+            <td colSpan={6} className="px-4 py-10 text-center text-sm text-ink-muted">
+              No transactions match your search.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
       </div>
     </div>
   );

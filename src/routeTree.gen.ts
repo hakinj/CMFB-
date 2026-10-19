@@ -11,9 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AdminpanelRouteImport } from './routes/adminpanel'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAccountsRouteImport } from './routes/_authenticated/accounts'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedBeneficiariesRouteImport } from './routes/_authenticated/beneficiaries'
 import { Route as AuthenticatedCardsRouteImport } from './routes/_authenticated/cards'
 import { Route as AuthenticatedCustomerServiceRouteImport } from './routes/_authenticated/customerService'
@@ -32,6 +32,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminpanelRoute = AdminpanelRouteImport.update({
+  id: '/adminpanel',
+  path: '/adminpanel',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -40,11 +45,6 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedAccountsRoute = AuthenticatedAccountsRouteImport.update({
   id: '/accounts',
   path: '/accounts',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedBeneficiariesRoute =
@@ -94,9 +94,9 @@ const AuthenticatedTransferRoute = AuthenticatedTransferRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/adminpanel': typeof AdminpanelRoute
   '/auth': typeof AuthRoute
   '/accounts': typeof AuthenticatedAccountsRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/beneficiaries': typeof AuthenticatedBeneficiariesRoute
   '/cards': typeof AuthenticatedCardsRoute
   '/customerService': typeof AuthenticatedCustomerServiceRoute
@@ -108,9 +108,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/adminpanel': typeof AdminpanelRoute
   '/auth': typeof AuthRoute
   '/accounts': typeof AuthenticatedAccountsRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/beneficiaries': typeof AuthenticatedBeneficiariesRoute
   '/cards': typeof AuthenticatedCardsRoute
   '/customerService': typeof AuthenticatedCustomerServiceRoute
@@ -124,9 +124,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/adminpanel': typeof AdminpanelRoute
   '/auth': typeof AuthRoute
   '/_authenticated/accounts': typeof AuthenticatedAccountsRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/beneficiaries': typeof AuthenticatedBeneficiariesRoute
   '/_authenticated/cards': typeof AuthenticatedCardsRoute
   '/_authenticated/customerService': typeof AuthenticatedCustomerServiceRoute
@@ -140,9 +140,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/adminpanel'
     | '/auth'
     | '/accounts'
-    | '/admin'
     | '/beneficiaries'
     | '/cards'
     | '/customerService'
@@ -154,9 +154,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/adminpanel'
     | '/auth'
     | '/accounts'
-    | '/admin'
     | '/beneficiaries'
     | '/cards'
     | '/customerService'
@@ -169,9 +169,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/adminpanel'
     | '/auth'
     | '/_authenticated/accounts'
-    | '/_authenticated/admin'
     | '/_authenticated/beneficiaries'
     | '/_authenticated/cards'
     | '/_authenticated/customerService'
@@ -185,6 +185,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AdminpanelRoute: typeof AdminpanelRoute
   AuthRoute: typeof AuthRoute
 }
 
@@ -204,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/adminpanel': {
+      id: '/adminpanel'
+      path: '/adminpanel'
+      fullPath: '/adminpanel'
+      preLoaderRoute: typeof AdminpanelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -216,13 +224,6 @@ declare module '@tanstack/react-router' {
       path: '/accounts'
       fullPath: '/accounts'
       preLoaderRoute: typeof AuthenticatedAccountsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/beneficiaries': {
@@ -286,7 +287,6 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountsRoute: typeof AuthenticatedAccountsRoute
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedBeneficiariesRoute: typeof AuthenticatedBeneficiariesRoute
   AuthenticatedCardsRoute: typeof AuthenticatedCardsRoute
   AuthenticatedCustomerServiceRoute: typeof AuthenticatedCustomerServiceRoute
@@ -299,7 +299,6 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountsRoute: AuthenticatedAccountsRoute,
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedBeneficiariesRoute: AuthenticatedBeneficiariesRoute,
   AuthenticatedCardsRoute: AuthenticatedCardsRoute,
   AuthenticatedCustomerServiceRoute: AuthenticatedCustomerServiceRoute,
@@ -316,6 +315,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AdminpanelRoute: AdminpanelRoute,
   AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport

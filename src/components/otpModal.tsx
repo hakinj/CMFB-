@@ -58,7 +58,7 @@ export function OtpModal({
 
     try {
       
-      if (verifyOtp == otp) {
+      if (verifyOtp !== otp) {
         setError('Invalid OTP code. Please check and try again.')
         return;
       }

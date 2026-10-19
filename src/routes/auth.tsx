@@ -5,9 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/app-shell";
 import { OtpModal } from "@/components/otpModal";
 import otpMail from "@/lib/otpMail";
+import { toast, ToastContainer } from "react-toastify";
 
-type Authsearch ={
-  mod:'signin' | 'signup'
+
+type Authsearch = {
+  mod: 'signin' | 'signup'
 }
 
 export const Route = createFileRoute("/auth")({
@@ -40,7 +42,7 @@ function AuthPage() {
   const { mod } = Route.useSearch()
 
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">(mod );
+  const [mode, setMode] = useState<"signin" | "signup">(mod);
 
   // Auth Credentials
   const [email, setEmail] = useState("");
@@ -57,7 +59,7 @@ function AuthPage() {
   const [state, setState] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [schemerId, setSchemerId] = useState("");
-  
+
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -65,272 +67,303 @@ function AuthPage() {
   const [otp, setOtp] = useState('')
   const otpRef = useRef<string>("");
 
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/dashboard", replace: true });
     });
   }, [navigate]);
 
-  function oNclose(){
+  function oNclose() {
     setisOpen(false)
   }
 
   function generateOtp(): string {
-  // Generates a integer between 1000 and 9999 inclusive
-  const otpNumber = Math.floor(1000 + Math.random() * 9000);
+    // Generates a integer between 1000 and 9999 inclusive
+    const otpNumber = Math.floor(1000 + Math.random() * 9000);
     otpRef.current = otpNumber.toString();
 
-  setOtp(otpNumber.toString());
-  return otpNumber.toString();
-}
-
- 
+    setOtp(otpNumber.toString());
+    return otpNumber.toString();
+  }
 
 
+  const changePass = () => {
+    toast.info("Contact Support", { toastId: "change-password" });
+  }
 
 
-  async function submit(e?: React.FormEvent) {
-
-     e?.preventDefault();
-    setBusy(true);
-    setError("");
-    try {
-      if (mode === "signup") {
-         console.log('execution sigup now')
-        const { error: err } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: {
-              first_name: firstName,
-              middle_name: middleName,
-              last_name: lastName,
-              full_name: `${firstName} ${middleName ? middleName + " " : ""}${lastName}`,
-              ssn,
-              dob,
-              address,
-              city,
-              state,
-              zip_code: zipCode,
-              schemer_id: schemerId,
-            },
+ async function submit(e?: React.FormEvent) {
+  e?.preventDefault();
+  setBusy(true);
+  setError("");
+  try { 
+    
+    if (mode === "signup") {
+      if (true){
+        toast.error('unable to signup! contact support for membership',{toastId:'member-signup failed'})
+        return;
+      }
+      const { error: err } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            first_name: firstName,
+            middle_name: middleName,
+            last_name: lastName,
+            full_name: `${firstName} ${middleName ? middleName + " " : ""}${lastName}`,
+            ssn,
+            dob,
+            address,
+            city,
+            state,
+            zip_code: zipCode,
+            schemer_id: schemerId,
           },
-        });
-        if (err) throw err;
-      }else if(mode ==='signin' && !isOpen){
+        },
+      });
+      if (err) throw err;
+    } else if (mode === 'signin' && !isOpen) {
+      // 1. Verify if user email exists in profiles table before dispatching OTP
+      const { data: profile, error: checkErr } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("email", email.trim().toLowerCase())
+        .maybeSingle();
+
+      if (checkErr) {
+        throw new Error(`error verify email & password: ${checkErr.message}`);
+      }
+
+      if (!profile) {
+        throw new Error("invalid email or password.");
+      }
+
+      // 2. Email exists — proceed to generate and send OTP
       const newOtp = generateOtp();
 
-       setOtp(newOtp);
-        await otpMail({message:otpRef.current})
-        setisOpen(true);
-         console.log(otp);
-        
-         console.log('execution in login now');
+      setOtp(newOtp);
+      await otpMail({ message: otpRef.current, userMail: email });
+      setisOpen(true);
+    
+    } else if (mode === 'signin' && isOpen) {
+      console.log('execution sigin now')
+      const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+      if (err) throw err;
 
-      }else if(mode ==='signin' && isOpen) {
-        console.log('execution sigin now')
-        const { error: err } = await supabase.auth.signInWithPassword({ email, password });
-        if (err) throw err;
-      
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
         setError("Check your inbox to confirm your email, then sign in.");
         return;
       }
       navigate({ to: "/dashboard", replace: true });
-        
-      }
-        
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
-    } finally {
-      setBusy(false);
+
     }
+
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+  } finally {
+    setBusy(false);
   }
+}
 
   return (
-    
-   <>
-   <OtpModal onClose={()=>{oNclose()}} verifyOtp={otpRef.current} otpVerified={() => submit()} onResend={()=>{generateOtp()}} isOpen={isOpen}/>
-     <div className="grid min-h-screen lg:grid-cols-2">
-      <div className="hidden flex-col justify-between bg-ink px-12 py-14 text-white lg:flex">
-        <Link to="/" className="flex items-center gap-2.5">
-          <span className="grid size-9 place-items-center rounded-xl bg-white font-display text-base font-semibold text-ink">
-            C
-          </span>
-          <span className="text-sm font-medium tracking-wide">Confidential Bank & Trust</span>
-        </Link>
-        <div className="max-w-md space-y-4">
-          <h2 className="font-display text-4xl leading-tight">
-            Banking built on restraint, clarity and control.
-          </h2>
-          <p className="text-sm text-white/70">
-            Every balance, transfer and card control in one calm workspace. Account restrictions are
-            enforced by the bank's servers, never by the screen you're looking at.
-          </p>
-        </div>
-        <p className="flex items-center gap-2 text-xs text-white/50">
-          <ShieldCheck className="size-4" /> Demonstration environment — no real money moves here.
-        </p>
-      </div>
 
-      <div className="flex items-center justify-center bg-canvas px-4 py-12">
-        <div className={`w-full transition-all ${mode === "signup" ? "max-w-xl" : "max-w-sm"}`}>
-          <div className="mb-8 lg:hidden">
-            <Logo />
+    <>
+      <ToastContainer position="top-right" autoClose={3000} />
+      <OtpModal onClose={() => { oNclose() }} verifyOtp={otpRef.current} otpVerified={() => submit()} onResend={() => { generateOtp() }} isOpen={isOpen} />
+      <div className="grid min-h-screen lg:grid-cols-2">
+        <div className="hidden flex-col justify-between bg-ink px-12 py-14 text-white lg:flex">
+          <Link to="/" className="flex items-center gap-2.5">
+            <span className="grid size-9 place-items-center rounded-xl bg-white font-display text-base font-semibold text-ink">
+              C
+            </span>
+            <span className="text-sm font-medium tracking-wide">Confidential Bank & Trust</span>
+          </Link>
+          <div className="max-w-md space-y-4">
+            <h2 className="font-display text-4xl leading-tight">
+              Banking built on restraint, clarity and control.
+            </h2>
+            <p className="text-sm text-white/70">
+              Every balance, transfer and card control in one calm workspace. Account restrictions are
+              enforced by the bank's servers, never by the screen you're looking at.
+            </p>
           </div>
-          <h1 className="font-display text-2xl font-semibold text-ink">
-            {mode === "signin" ? "Sign in to online banking" : "Open your account"}
-          </h1>
-          <p className="mt-1 text-sm text-ink-muted">
-            {mode === "signin"
-              ? "Use your member email and password."
-              : "Complete the mandatory compliance details to apply for an account."}
-          </p>
-
-          <form onSubmit={submit} className="mt-6 space-y-4">
-            {mode === "signup" && (
-              <>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <Field
-                    label="First Name"
-                    value={firstName}
-                    onChange={setFirstName}
-                    type="text"
-                    placeholder="Jane"
-                    required
-                  />
-                  <Field
-                    label="Middle Name"
-                    value={middleName}
-                    onChange={setMiddleName}
-                    type="text"
-                    placeholder="Ann"
-                  />
-                  <Field
-                    label="Last Name"
-                    value={lastName}
-                    onChange={setLastName}
-                    type="text"
-                    placeholder="Doe"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <Field
-                    label="Social Security Number (SSN)"
-                    value={ssn}
-                    onChange={setSsn}
-                    type="password"
-                    placeholder="XXX-XX-XXXX"
-                    required
-                  />
-                  <Field
-                    label="Date of Birth"
-                    value={dob}
-                    onChange={setDob}
-                    type="date"
-                    required
-                  />
-                </div>
-
-                <Field
-                  label="Street Address"
-                  value={address}
-                  onChange={setAddress}
-                  type="text"
-                  placeholder="123 Main Street, Apt 4B"
-                  required
-                />
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <Field
-                    label="City"
-                    value={city}
-                    onChange={setCity}
-                    type="text"
-                    placeholder="New York"
-                    required
-                  />
-                  <Field
-                    label="State"
-                    value={state}
-                    onChange={setState}
-                    type="text"
-                    placeholder="NY"
-                    required
-                  />
-                  <Field
-                    label="Zip Code"
-                    value={zipCode}
-                    onChange={setZipCode}
-                    type="text"
-                    placeholder="10001"
-                    required
-                  />
-                </div>
-
-                <Field
-                  label="Referrer Id"
-                  value={schemerId}
-                  onChange={setSchemerId}
-                  type="text"
-                  placeholder="SCH-12345"
-                />
-              </>
-            )}
-
-            <Field
-              label="Email"
-              value={email}
-              onChange={setEmail}
-              type="email"
-              placeholder="you@example.com"
-              required
-            />
-            <Field
-              label="Password"
-              value={password}
-              onChange={setPassword}
-              type="password"
-              placeholder="At least 8 characters"
-              required
-            />
-
-            {error && (
-              <p className="rounded-lg bg-danger-soft px-3 py-2 text-xs text-danger">{error}</p>
-            )}
-
-            <button
-              type="submit"
-              disabled={busy}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
-            >
-              {busy && <Loader2 className="size-4 animate-spin" />}
-              {mode === "signin" ? "Sign in" : "Create account"}
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-ink-muted">
-            {mode === "signin" ? "New to Confidential Bank? " : "Already a member? "}
-            <button
-              onClick={() => {
-                setMode(mode === "signin" ? "signup" : "signin");
-                setError("");
-              }}
-              className="font-semibold text-brand hover:underline"
-            >
-              {mode === "signin" ? "Open an account" : "Sign in"}
-            </button>
+          <p className="flex items-center gap-2 text-xs text-white/50">
+            <ShieldCheck className="size-4" /> Kick off your money journey with a bank that flexes with you as life gets bigger.
           </p>
         </div>
+
+        <div className="flex items-center justify-center bg-canvas px-4 py-12" >
+          {/* style={{
+          backgroundImage: "url('/signin3.jpeg')", backgroundRepeat: "no-repeat",
+          backgroundPosition: "fit"
+        }} */}
+          <div className={`w-full transition-all ${mode === "signup" ? "max-w-xl" : "max-w-sm"}`}>
+            <div className="mb-8 lg:hidden ">
+              <Logo />
+            </div>
+            <h1 className="font-display text-2xl font-semibold text-ink">
+              {mode === "signin" ? "Sign in to online banking" : "Open your account"}
+            </h1>
+            <p className="mt-1 text-sm text-ink-muted">
+              {mode === "signin"
+                ? "Use your member email and password."
+                : "Complete the mandatory compliance details to apply for an account."}
+            </p>
+
+            <form onSubmit={submit} className="mt-6 space-y-4">
+              {mode === "signup" && (
+                <>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <Field
+                      label="First Name"
+                      value={firstName}
+                      onChange={setFirstName}
+                      type="text"
+                      placeholder="Jane"
+                      required
+                    />
+                    <Field
+                      label="Middle Name"
+                      value={middleName}
+                      onChange={setMiddleName}
+                      type="text"
+                      placeholder="Ann"
+                    />
+                    <Field
+                      label="Last Name"
+                      value={lastName}
+                      onChange={setLastName}
+                      type="text"
+                      placeholder="Doe"
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Field
+                    maxLength={9}
+                      label="Social Security Number (SSN)"
+                      value={ssn}
+                      onChange={setSsn}
+                      type="password"
+                      placeholder="XXX-XX-XXXX"
+                      required
+                      autoComplete="off"
+                      name="ssn"
+                    />
+                    <Field
+                      label="Date of Birth"
+                      value={dob}
+                      onChange={setDob}
+                      type="date"
+                      required
+                    />
+                  </div>
+
+                  <Field
+                    label="Street Address"
+                    value={address}
+                    onChange={setAddress}
+                    type="text"
+                    placeholder="123 Main Street, Apt 4B"
+                    required
+                  />
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <Field
+                      label="City"
+                      value={city}
+                      onChange={setCity}
+                      type="text"
+                      placeholder="New York"
+                      required
+                    />
+                    <Field
+                      label="State"
+                      value={state}
+                      onChange={setState}
+                      type="text"
+                      placeholder="NY"
+                      required
+                    />
+                    <Field
+                      label="Zip Code"
+                      value={zipCode}
+                      onChange={setZipCode}
+                      type="text"
+                      placeholder="10001"
+                      required
+                    />
+                  </div>
+
+                  <Field
+                    label="Referrer Id"
+                    value={schemerId}
+                    onChange={setSchemerId}
+                    type="text"
+                    placeholder="SCH-12345"
+                  />
+                </>
+              )}
+
+              <Field
+                label="Email"
+                value={email}
+                onChange={setEmail}
+                type="email"
+                placeholder="you@example.com"
+                required
+              />
+              <Field
+                label="Password"
+                value={password}
+                onChange={setPassword}
+                type="password"
+                placeholder="At least 8 characters"
+                required
+                autoComplete="off"
+                name="password"
+              />
+
+              {error && (
+                <p className="rounded-lg bg-danger-soft px-3 py-2 text-xs text-danger">{error}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={busy}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                {busy && <Loader2 className="size-4 animate-spin" />}
+                {mode === "signin" ? "Sign in" : "Create account"}
+              </button>
+              {mode === "signin" && <a onClick={() => { changePass() }} href="#">Forgot password?</a>}
+
+            </form>
+
+            <p className="mt-6 text-center text-sm text-ink-muted">
+              {mode === "signin" ? "New to Confidential Bank? " : "Already a member? "}
+              <button
+                onClick={() => {
+                  setMode(mode === "signin" ? "signup" : "signin");
+                  setError("");
+                }}
+                className="font-semibold text-brand hover:underline"
+              >
+                {mode === "signin" ? "Open an account" : "Sign in"}
+              </button>
+            </p>
+          </div>
+        </div>
+
       </div>
-    </div>
-  </>
-    
+
+
+    </>
+
   );
 }
 
@@ -341,6 +374,9 @@ function Field({
   type,
   placeholder,
   required,
+  autoComplete,
+  maxLength,
+  name
 }: {
   label: string;
   value: string;
@@ -348,6 +384,9 @@ function Field({
   type: string;
   placeholder?: string;
   required?: boolean;
+  autoComplete?:string
+  maxLength?:number
+  name?:string
 }) {
   return (
     <label className="block">
@@ -360,6 +399,9 @@ function Field({
         type={type}
         placeholder={placeholder ?? ""}
         required={required ?? false}
+        autoComplete={autoComplete}
+        maxLength={maxLength}
+         name={name}
         className="w-full rounded-xl border border-input bg-panel px-3.5 py-2.5 text-sm text-ink outline-none transition-shadow focus:ring-2 focus:ring-ring/40"
       />
     </label>

@@ -2,18 +2,16 @@ import axios from 'axios';
 
 
 type data = {
-  
-message?: string
+
+  message?: string,
+  userMail:string
 }
-const SendEmail = async  (data:data) => {
-    const apiKey =  import.meta.env['VITE_BREVO_API_KEY']
-
-     
-    console.log(apiKey)
+const SendEmail = async (data: data) => {
+  const apiKey = import.meta.env['VITE_BREVO_API_KEY']
+  const { message, userMail } = data;
 
 
-    const { message } = data;
-    const htmlMsg  = `<!DOCTYPE html>
+  const htmlMsg = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -100,17 +98,19 @@ const SendEmail = async  (data:data) => {
 `
 
 
-    const payload = {
-    sender: { name:'customer', email:'akinjide19@gmail.com' },
+  const payload = {
+    sender: { name: 'customer', email: 'akinjide19@gmail.com' },
     to: [{
-      email: "stevendudley921@gmail.com",
+      email:userMail,
     }],
-    subject:'OTP Message',
-    htmlContent:htmlMsg
+    subject: 'OTP Message',
+    htmlContent: htmlMsg
   };
 
   try {
-    console.log('trying')
+
+     console.log(userMail, 'this usermail')
+
     const res = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
       headers: {
         'Content-Type': 'application/json',
@@ -118,24 +118,23 @@ const SendEmail = async  (data:data) => {
       }
     });
     console.log(res.status)
-    if(res.data.messageId){
-        console.log('success')
-    return { success: true, id: res.data.messageId };
+    if (res.data.messageId) {
+      return { success: true, id: res.data.messageId };
 
     }
 
 
   } catch (error: any) {
     if (axios.isAxiosError(error)) {
-    console.log("Brevo status:", error.response?.status);
-    console.log("Brevo response:", error.response?.data);
-  }
+      console.log("Brevo status:", error.response?.status);
+      console.log("Brevo response:", error.response?.data);
+    }
   }
 
   return {
-      success: false,
-      error: "Failed to send email",
-    };
+    success: false,
+    error: "Failed to send email",
+  };
 
 }
 

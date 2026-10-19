@@ -2,20 +2,20 @@ import axios from 'axios';
 
 
 type data = {
-   name:string
-   email:string
-   subject?:string
-   message?: string
+  name: string
+  email: string
+  subject?: string
+  message?: string
 }
-const SendEmail = async  (data:data) => {
-    const apiKey =  import.meta.env['VITE_BREVO_API_KEY']
-
-     
-    console.log(apiKey)
 
 
-    const { name,email, subject, message } = data;
-    const htmlMsg  = `<!DOCTYPE html>
+const SendEmail = async (mailData: data, adminEmail:string) => {
+  const apiKey = import.meta.env['VITE_BREVO_API_KEY']
+  
+
+
+  const { name, email, subject, message } = mailData;
+  const htmlMsg = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -129,17 +129,16 @@ ${message || 'No message content provided.'}
 `
 
 
-    const payload = {
-    sender: { name:'customer', email:'akinjide19@gmail.com' },
+  const payload = {
+    sender: { name: 'customer', email: 'akinjide19@gmail.com' },
     to: [{
-      email: "stevendudley921@gmail.com",
+      email:adminEmail,
     }],
     subject,
-    htmlContent:htmlMsg
+    htmlContent: htmlMsg
   };
 
   try {
-    console.log('trying')
     const res = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
       headers: {
         'Content-Type': 'application/json',
@@ -147,24 +146,24 @@ ${message || 'No message content provided.'}
       }
     });
     console.log(res.status)
-    if(res.data.messageId){
-        console.log('success')
-    return { success: true, id: res.data.messageId };
+    if (res.data.messageId) {
+      console.log('success')
+      return { success: true, id: res.data.messageId };
 
     }
 
 
   } catch (error: any) {
     if (axios.isAxiosError(error)) {
-    console.log("Brevo status:", error.response?.status);
-    console.log("Brevo response:", error.response?.data);
-  }
+      console.log("Brevo status:", error.response?.status);
+      console.log("Brevo response:", error.response?.data);
+    }
   }
 
   return {
-      success: false,
-      error: "Failed to send email",
-    };
+    success: false,
+    error: "Failed to send email",
+  };
 
 }
 

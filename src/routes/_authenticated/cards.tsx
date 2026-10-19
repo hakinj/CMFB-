@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Snowflake, Sun } from "lucide-react";
+import { Snowflake, Sun, } from "lucide-react";
 import { useExtras, extrasKey } from "@/hooks/use-bank";
 import { money, setCardFrozen, setCardLimit } from "@/lib/bank";
 import { PageHeader, Skeletons } from "@/components/page-header";
+import { supabase } from "@/integrations/supabase/client";
+import { toast, ToastContainer } from "react-toastify";
+
 
 export const Route = createFileRoute("/_authenticated/cards")({
   head: () => ({
@@ -26,8 +29,39 @@ function CardsPage() {
 
   const cards = data.cards ?? [];
 
+  // Adjust path to your Supabase client
+
+  async function isUserRestricted(): Promise<boolean> {
+    try {
+      // 1. Get current authenticated session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError || !session?.user?.email) {
+        return false; // No authenticated user found
+      }
+
+      // 2. Fetch status from profile using user's email
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("status")
+        .eq("email", session.user.email)
+        .single();
+
+      if (profileError || !profile) {
+        return false;
+      }
+
+      // 3. Return true if restricted
+      return profile.status.toLocaleUpperCase() === "RESTRICTED";
+    } catch (err) {
+      console.error("Error checking restricted status:", err);
+      return false;
+    }
+  }
+
   return (
     <div>
+       <ToastContainer position="top-right" autoClose={3000} />
       <PageHeader
         title="Cards"
         subtitle="Freeze a card instantly and control how much it can spend each month."
@@ -80,7 +114,17 @@ function CardsPage() {
                   </p>
                 </div>
                 <button
-                  onClick={() => setCardFrozen(rawCard.id, !isFrozen).then(refresh)}
+                  onClick={async () => {
+                    const restricted = await isUserRestricted();
+                    if (restricted) {
+                      toast.error("Cannot unfreeze card: Account is restricted.",{toastId:'çannot unfreeze'}, );
+                      return;
+                    }
+
+                    await setCardFrozen(rawCard.id, !isFrozen);
+                    refresh();
+                    toast.error("Card successfullu unfreeze",{toastId:'çard unfreezed'} );
+                  }}
                   className="inline-flex items-center gap-2 rounded-xl border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-brand hover:text-brand"
                 >
                   {isFrozen ? <Sun className="size-4" /> : <Snowflake className="size-4" />}
@@ -114,3 +158,4 @@ function CardsPage() {
     </div>
   );
 }
+

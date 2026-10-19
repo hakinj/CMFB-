@@ -24,14 +24,11 @@ function AccountsPage() {
   const accounts = data.accounts ?? [];
   const rawTransactions = data.transactions ?? [];
 
-
-
-
   return (
     <div>
       <PageHeader
         title="Accounts"
-        subtitle="Every deposit account held with Confidential BANK & TRUST."
+        subtitle="Every deposit account held with Confidential Bank & Trust."
       />
       {data.profile.status && statusCopy[data.profile.status] && (
         <StatusNotice status={data.profile.status} blurb={statusCopy[data.profile.status].blurb} />

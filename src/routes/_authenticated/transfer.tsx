@@ -63,13 +63,14 @@ function TransferPage() {
     }
   }
 
+
   return (
     <div>
       <PageHeader
         title="Send money"
         subtitle="Transfers are validated on the bank's servers. Accounts that are not active cannot send money."
       />
-      <StatusNotice status={data.profile.status} blurb={statusCopy[data.profile.status].blurb} />
+      <StatusNotice status={data.profile.status} blurb={statusCopy[data.profile.status]?.blurb} />
 
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <form onSubmit={submit} className="reveal panel space-y-4 p-6">
@@ -81,7 +82,7 @@ function TransferPage() {
             >
               {data.accounts.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.id} · {maskAccount(a.account_number)} · {money(a.balance, a.currency)}
+                  {maskAccount(a.account_number)} · {money(a.balance, a.currency)}
                 </option>
               ))}
             </select>

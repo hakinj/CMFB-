@@ -250,7 +250,7 @@ function Landing() {
         </div>
       </section>
 
-      {/* US Commercial Bank Footer */}
+     
       <footer className="border-t border-line bg-panel pt-16 pb-12 text-xs">
         <div className="mx-auto max-w-7xl px-5">
           {/* Main Navigation Links */}

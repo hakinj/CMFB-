@@ -1,12 +1,17 @@
+import { Skeletons } from '@/components/page-header';
+import { useOverview } from '@/hooks/use-bank';
 import SendEmail from '@/lib/sendMail'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/_authenticated/customerService')({
-  component: RouteComponent,
+  component: customerService,
 })
 
-function RouteComponent() {
+function customerService() {
+    const { data, isLoading } = useOverview();
+    if (isLoading || !data?.profile) return <Skeletons rows={3} />;
+   const profileDate =data.profile ?? []
     const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -35,7 +40,7 @@ function RouteComponent() {
     setStatus({ type: null, message: '' })
 
     try {
-     const res= await SendEmail(formData)
+     const res= await SendEmail(formData,profileDate.email)
      if(res.success){
        setStatus({
         type: 'success',

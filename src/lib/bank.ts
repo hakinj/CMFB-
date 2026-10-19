@@ -25,6 +25,8 @@ export const longDate = (iso: string) =>
     minute: "2-digit",
   });
 
+const userId = await requireUserId();
+
 export const maskAccount = (value: string) => `•••• ${value.slice(-4)}`;
 
 export const statusCopy: Record<AccountStatus, { label: string; blurb: string }> = {
@@ -44,15 +46,13 @@ export const statusCopy: Record<AccountStatus, { label: string; blurb: string }>
 
 async function requireUserId() {
   const { data } = await supabase.auth.getUser();
-  if (!data.user) throw new Error("Not signed in");
+  if (!data.user) return '';
   return data.user.id;
 }
 
 export async function fetchOverview() {
   const userId = await requireUserId();
     
-  console.log(userId)
-
   const [profile, accounts, transactions, notifications, roles] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
     supabase.from("accounts").select("*").eq("user_id", userId).order("created_at"),
@@ -97,6 +97,7 @@ export async function sendTransfer(input: {
   memo: string;
 }) {
   const { data, error } = await supabase.rpc("make_transfer", {
+    _id:userId,
     _from_account: input.fromAccount,
     _to_name: input.toName,
     _to_account: input.toAccount,
@@ -106,7 +107,7 @@ export async function sendTransfer(input: {
   if (error) {
     if (error.message.includes("ACCOUNT_NOT_ACTIVE")) {
       throw new Error(
-        "Transfer blocked: this account is not ACTIVE. The block was applied and recorded by the bank's servers.",
+        "Transfer blocked: this account is not Active. Contact Support.",
       );
     }
     if (error.message.includes("INSUFFICIENT_FUNDS")) {
@@ -244,7 +245,107 @@ export async function fetchAdminData() {
   };
 }
 
-export async function adminSetStatus(userId: string, status: AccountStatus) {
-  const { error } = await supabase.rpc("admin_set_status", { _user_id: userId, _status: status });
-  if (error) throw new Error(error.message);
+export async function adminSetStatus(userId: string, newStatus: string) {
+  const { data, error } = await (supabase.rpc as any)("admin_set_profile_status", {
+    target_user_id: userId,
+    new_status: newStatus.toLowerCase(), // Ensures lowercase string before enum cast
+  });
+
+  if (error) {
+    console.error("Error updating profile status via RPC:", error);
+    throw new Error(error.message || "Failed to update profile status.");
+  }
+
+  return data;
+}
+
+
+export async function sendUserNotification(
+  userId: string,
+  title: string,
+  body: string,
+  kind: string = "info"
+) {
+  const { data, error } = await (supabase.from("notifications") as any)
+    .insert([
+      {
+        user_id: userId,
+        title,
+        body,
+        kind,
+        read: false,
+      },
+    ])
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message || "Failed to create notification.");
+  }
+  return data;
+}
+
+// Fetch all notifications for a specific user ID
+export async function fetchUserNotifications(userId: string) {
+  const { data, error } = await supabase
+    .from("notifications")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(error.message || "Failed to fetch notifications.");
+  }
+  return data;
+}
+
+// Delete a specific notification by ID
+export async function deleteNotification(notificationId: string) {
+  const { error } = await supabase
+    .from("notifications")
+    .delete()
+    .eq("id", notificationId);
+
+  if (error) {
+    throw new Error(error.message || "Failed to delete notification.");
+  }
+}
+
+export async function superAdminUpdateColumn(
+  targetTable: "profiles" | "accounts" | "transactions" | "cards" | "notifications",
+  lookupValue: string, // User email address or Record UUID
+  lookupType: "email" | "id",
+  columnName: string,
+  newValue: string
+) {
+  const { data, error } = await (supabase.rpc as any)("super_admin_update_record", {
+    target_table: targetTable,
+    lookup_value: lookupValue,
+    lookup_type: lookupType,
+    column_name: columnName,
+    new_value: newValue,
+  });
+
+  if (error) {
+    throw new Error(error.message || `Failed to update ${columnName} in ${targetTable}`);
+  }
+  return data;
+}
+
+// Dynamic Record Deletion by Email or ID
+export async function superAdminDeleteRecord(
+  targetTable: "profiles" | "accounts" | "transactions" | "cards" | "notifications",
+  lookupValue: string,
+  lookupType: "email" | "id"
+) {
+  const { data, error } = await (supabase.rpc as any)("super_admin_delete_record", {
+    target_table: targetTable,
+    lookup_value: lookupValue,
+    lookup_type: lookupType,
+  });
+
+  if (error) {
+    throw new Error(error.message || `Failed to delete from ${targetTable}`);
+  }
+  return data;
 }

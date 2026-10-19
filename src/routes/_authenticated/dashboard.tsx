@@ -73,7 +73,7 @@ function Dashboard() {
     <div>
       <PageHeader
         title={`Good day, ${firstName}`}
-        subtitle="Here's where your money stands today across Confidential BANK & TRUST."
+        subtitle="Here's where your money stands today across Confidential Bank & Trust."
       />
       {data.profile.status && statusCopy[data.profile.status] && (
         <StatusNotice
