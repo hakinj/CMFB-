@@ -199,10 +199,14 @@ function AdminAuthPage() {
           <div className="border-t border-white/10 p-4">
             <button
               type="button"
+              onClick={()=>{
+                sessionStorage.setItem(STORAGE_KEY, "false");
+                window.location.reload();
+              }}
               className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-300 transition hover:bg-red-500/10 hover:text-red-400"
             >
               <LogOut size={19} />
-              <span>Sign Out</span>
+              <span>Sign Ou</span>
             </button>
           </div>
         </aside>
@@ -2911,6 +2915,7 @@ export function AdminPanelGuard() {
     }
     setIsCheckingSession(false);
   }, []);
+
 
   const handleVerifyKey = (e: React.FormEvent) => {
     e.preventDefault();

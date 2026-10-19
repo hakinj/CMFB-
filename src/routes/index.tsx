@@ -240,8 +240,8 @@ function Landing() {
             <div className="lg:col-span-6 order-1 lg:order-2">
               <div className="overflow-hidden rounded-3xl border border-line bg-panel shadow-xl">
                 <img
-                  src="/landing3.jpg"
-                  alt="Couple reviewing home finances on laptop"
+                  src="/landing3.jpeg"
+                  alt="image"
                   className="h-[400px] w-full object-cover"
                 />
               </div>
